@@ -1,10 +1,10 @@
-import play.PlayImport.PlayKeys._
+import play.sbt.PlayScala._
 
 name := "apibuilder-generator"
 
 organization := "io.apibuilder.generator"
 
-val scalaVer = "2.11.11"
+val scalaVer = "2.12.3"
 
 scalaVersion in ThisBuild := scalaVer
 
@@ -14,7 +14,8 @@ lazy val generated = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      ws
+      ws,
+      filters
     )
   )
 
@@ -37,7 +38,8 @@ lazy val generator = project
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       ws,
-      "org.scalatestplus" %% "play" % "1.4.0" % "test"
+      filters,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
     )
   )
 
@@ -78,7 +80,7 @@ lazy val kotlinGenerator = project
       "com.squareup" % "kotlinpoet" % "0.4.0",
       "com.squareup.retrofit2" % "retrofit" % "2.3.0",
       "org.jetbrains.kotlin" % "kotlin-compiler" % "1.1.4-3" % "test",
-      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.4" % "test",
       "org.mockito" % "mockito-all" % "1.10.19" % "test"
     )
   )
@@ -88,7 +90,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   organization := "io.apibuilder",
   libraryDependencies ++= Seq(
     "org.atteo" % "evo-inflector" % "1.2.2",
-    "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+    "org.scalatest" %% "scalatest" % "3.0.4" % "test",
     "org.mockito" % "mockito-all" % "1.10.19" % "test",
     "com.github.javaparser" % "javaparser-core" % "3.3.1" % "test",
     "org.scala-lang" % "scala-compiler" % scalaVer % "test",

@@ -1367,6 +1367,8 @@ package io.apibuilder.spec.v0 {
 
 package io.apibuilder.spec.v0 {
 
+  import common.WsStandaloneClient
+
   object Constants {
 
     val Namespace = "io.apibuilder.spec.v0"
@@ -1380,7 +1382,7 @@ package io.apibuilder.spec.v0 {
     val baseUrl: String,
     auth: scala.Option[io.apibuilder.spec.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil
-  ) extends interfaces.Client {
+  ) extends interfaces.Client with WsStandaloneClient {
     import io.apibuilder.spec.v0.models.json._
 
     private[this] val logger = play.api.Logger("io.apibuilder.spec.v0.Client")
@@ -1394,7 +1396,7 @@ package io.apibuilder.spec.v0 {
     def _requestHolder(path: String): play.api.libs.ws.WSRequest = {
       import play.api.Play.current
 
-      val holder = play.api.libs.ws.WS.url(baseUrl + path).withHeaders(
+      val holder = wsClient.url(baseUrl + path).withHeaders(
         "User-Agent" -> Constants.UserAgent,
         "X-Apidoc-Version" -> Constants.Version,
         "X-Apidoc-Version-Major" -> Constants.VersionMajor.toString
@@ -1418,6 +1420,8 @@ package io.apibuilder.spec.v0 {
       }
       req
     }
+
+    import play.api.libs.ws.JsonBodyWritables._
 
     def _executeRequest(
       method: String,

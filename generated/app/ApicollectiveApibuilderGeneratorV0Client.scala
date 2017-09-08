@@ -318,6 +318,8 @@ package io.apibuilder.generator.v0 {
 
 package io.apibuilder.generator.v0 {
 
+  import common.WsStandaloneClient
+
   object Constants {
 
     val BaseUrl = "https://api.apibuilder.io"
@@ -332,7 +334,7 @@ package io.apibuilder.generator.v0 {
     val baseUrl: String = "https://api.apibuilder.io",
     auth: scala.Option[io.apibuilder.generator.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil
-  ) extends interfaces.Client {
+  ) extends interfaces.Client with WsStandaloneClient {
     import io.apibuilder.common.v0.models.json._
     import io.apibuilder.generator.v0.models.json._
     import io.apibuilder.spec.v0.models.json._
@@ -408,7 +410,7 @@ package io.apibuilder.generator.v0 {
     def _requestHolder(path: String): play.api.libs.ws.WSRequest = {
       import play.api.Play.current
 
-      val holder = play.api.libs.ws.WS.url(baseUrl + path).withHeaders(
+      val holder = wsClient.url(baseUrl + path).withHeaders(
         "User-Agent" -> Constants.UserAgent,
         "X-Apidoc-Version" -> Constants.Version,
         "X-Apidoc-Version-Major" -> Constants.VersionMajor.toString
@@ -432,6 +434,8 @@ package io.apibuilder.generator.v0 {
       }
       req
     }
+
+    import play.api.libs.ws.JsonBodyWritables._
 
     def _executeRequest(
       method: String,

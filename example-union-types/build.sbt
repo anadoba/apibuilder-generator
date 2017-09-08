@@ -1,17 +1,18 @@
-import play.PlayImport.PlayKeys._
+import play.sbt.PlayScala._
 
 name := "apidoc-example-union-types"
 
 organization := "io.apibuilder.generator"
 
-scalaVersion in ThisBuild := "2.11.7"
+scalaVersion in ThisBuild := "2.12.3"
 
 lazy val generated = project
   .in(file("generated"))
   .enablePlugins(PlayScala)
   .settings(
     libraryDependencies ++= Seq(
-      ws
+      ws,
+      filters
     )
   )
 
@@ -24,8 +25,9 @@ lazy val api = project
     routesImport += "io.apibuilder.example.union.types.v0._",
     libraryDependencies ++= Seq(
       ws,
+      filters,
       specs2 % Test,
-      "org.scalatest" %% "scalatest" % "2.2.5" % Test,
-      "org.scalatestplus" %% "play" % "1.4.0-M4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
     )
   )

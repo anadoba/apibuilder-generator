@@ -12,6 +12,6 @@ apicollective:
     play_2_x_routes:
     - generator/conf/routes
 flow:
-  chuck-onboarding:
+  postman:
     play_2_x_json:
-    - generated/app/FlowChuckOnboardingV0Models.scala
+    - generated/app/FlowPostmanCollectionV210V0Models.scala

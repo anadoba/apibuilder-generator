@@ -1,6 +1,7 @@
 package generator
 
-import io.flow.chuck.onboarding.v0.{models => postman}
+import io.flow.postman.collection.v210.v0.{models => postman}
+import io.flow.postman.collection.v210.v0.models._
 
 object Utils {
 
@@ -15,21 +16,21 @@ object Utils {
       key: String,
       value: String,
       `type`: String,
-      id: _root_.scala.Option[String] = None,
-      name: _root_.scala.Option[String] = None,
-      description: _root_.scala.Option[io.flow.chuck.onboarding.v0.models.Description] = None,
-      system: _root_.scala.Option[Boolean] = None,
-      disabled: _root_.scala.Option[Boolean] = None
+      id: Option[String] = None,
+      name: Option[String] = None,
+      description: Option[Description] = None,
+      system: Option[Boolean] = None,
+      disabled: Option[Boolean] = None
     ): postman.Variable = {
       postman.Variable(
-        id,
-        Some(key),
-        Some(value),
-        Some(`type`),
-        name,
-        description,
-        system,
-        disabled
+        id = id,
+        key = Some(key),
+        value = Some(value),
+        `type` = Some(`type`),
+        name = name,
+        description = description,
+        system = system,
+        disabled = disabled
       )
     }
   }

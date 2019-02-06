@@ -14,7 +14,7 @@ code:
         play_2_6_client: generated/app
         play_2_x_routes: generator/conf/routes
   flow:
-    chuck-onboarding:
+    postman:
       version: latest
       generators:
         play_2_x_json: generated/app

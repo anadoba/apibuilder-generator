@@ -116,6 +116,7 @@ lazy val kotlinGenerator = project
 lazy val postmanGenerator = project
   .in(file("postman-generator"))
   .dependsOn(lib, lib % "test->test")
+  .dependsOn(generated, generated % "test->test")
   .settings(commonSettings: _*)
 
 lazy val commonSettings: Seq[Setting[_]] = Seq(

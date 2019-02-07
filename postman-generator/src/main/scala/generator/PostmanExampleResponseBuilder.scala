@@ -52,7 +52,7 @@ object PostmanExampleResponseBuilder extends Logging {
           Some(exampleResponse)
 
         case unrecognized =>
-          println(s"Unrecognized response code in operation ${operation.method} ${operation.path} examples - $unrecognized. " +
+          logger.warn(s"Unrecognized response code in operation ${operation.method} ${operation.path} examples - $unrecognized. " +
             s"Dropping this example from the result Postman Collection")
           None
       }

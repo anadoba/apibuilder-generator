@@ -1,9 +1,12 @@
 package generator
 
+import generator.Utils.Description
 import io.apibuilder.generator.v0.models.{File, InvocationForm}
 import io.apibuilder.spec.v0.models._
+import io.flow.postman.collection.v210.v0.{models => postman}
+import io.flow.postman.collection.v210.v0.models.json.jsonReadsPostmanCollectionV210Collection
 import org.scalatest.{Assertion, Matchers, WordSpec}
-import play.api.libs.json.{JsArray, JsDefined, JsValue, Json}
+import play.api.libs.json.Json
 
 import scala.util.Try
 
@@ -93,42 +96,36 @@ class PostmanCollectionGeneratorSpec extends WordSpec with Matchers {
       val invocationForm = InvocationForm(referenceApiService, importedServices = None)
       val result = PostmanCollectionGenerator.invoke(invocationForm)
 
-      assertResultCollectionJson(result) { collectionJson =>
-        val postmanFolders = (collectionJson \ "item").as[JsArray].value
-        val folderNames = postmanFolders.map(js => (js \ "name").as[String])
-        folderNames shouldEqual List("echoes", "groups", "members", "organizations", "users")
+      assertResultCollectionJson(result) { collection =>
+        val postmanFolders = collection.item.collect {
+          case folder: postman.Folder => folder
+        }
+        postmanFolders.map(_.name) shouldEqual List("echoes", "groups", "members", "organizations", "users")
 
-        val membersFolder = postmanFolders.find(js => (js \ "name").as[String] == "members").get
-        val memberEndpoints = (membersFolder \ "item").as[JsArray].value
-        val bulkCreateMemberEndpoint = memberEndpoints.find(js => (js \ "name").as[String].contains("/members/:organization/members_bulk"))
+        val membersFolder = postmanFolders.find(_.name == "members").get
+        val memberEndpoints = membersFolder.item
+        val bulkCreateMemberEndpoint = memberEndpoints.find(_.name.exists(_.contains("/members/:organization/members_bulk")))
           .getOrElse(fail("reference service does not contain POST members_bulk operation"))
-        val bulkCreateMemberRequest = bulkCreateMemberEndpoint \ "request"
+        val bulkCreateMemberRequest = bulkCreateMemberEndpoint.request
 
-        val bulkCreateMemberBody = bulkCreateMemberRequest \ "body"
-        (bulkCreateMemberBody \ "mode").as[String] shouldEqual "raw"
-        val bulkCreateMemberPayloadString = (bulkCreateMemberBody \ "raw").as[String]
+        val bulkCreateMemberBody = bulkCreateMemberRequest.body.get
+        bulkCreateMemberBody.mode shouldEqual Some(postman.BodyMode.Raw)
+        val bulkCreateMemberPayloadString = bulkCreateMemberBody.raw.get
         Try(Json.parse(bulkCreateMemberPayloadString)).isSuccess shouldEqual true
 
-        val bulkCreateMemberRawUrl = (bulkCreateMemberRequest \ "url" \ "raw").as[String]
+        val bulkCreateMemberRawUrl = bulkCreateMemberRequest.url.get.raw.get
         bulkCreateMemberRawUrl shouldEqual "{{BASE_URL}}/members/:organization/members_bulk"
 
-        val bulkCreateMemberUrlVariable = bulkCreateMemberRequest \ "url" \ "variable"
-        bulkCreateMemberUrlVariable shouldEqual JsDefined(Json.parse(
-          """
-            |[{
-            |    "key": "organization",
-            |    "value": "{{ORGANIZATION}}",
-            |    "description": {
-            |      "content": "Type: uuid  | Required: true"
-            |    },
-            |    "disabled": false
-            |}]
-          """.stripMargin))
+        val bulkCreateMemberUrlVariable = bulkCreateMemberRequest.url.get.variable.get.head
+        bulkCreateMemberUrlVariable.key shouldEqual Some("organization")
+        bulkCreateMemberUrlVariable.value shouldEqual Some("{{ORGANIZATION}}")
+        bulkCreateMemberUrlVariable.description shouldEqual Some(Description("Type: uuid  | Required: true"))
+        bulkCreateMemberUrlVariable.disabled shouldEqual Some(false)
 
-        (bulkCreateMemberRequest \ "method").as[String] shouldEqual "POST"
-        val bulkCreateMemberHeader = (bulkCreateMemberRequest \ "header").as[JsArray].value.head
-        (bulkCreateMemberHeader \ "key").as[String] shouldEqual "Content-Type"
-        (bulkCreateMemberHeader \ "value").as[String] shouldEqual "application/json"
+        bulkCreateMemberRequest.method shouldEqual Some(postman.Method.Post)
+        val bulkCreateMemberHeader = bulkCreateMemberRequest.header.get.head
+        bulkCreateMemberHeader.key shouldEqual "Content-Type"
+        bulkCreateMemberHeader.value shouldEqual "application/json"
       }
     }
 
@@ -136,18 +133,20 @@ class PostmanCollectionGeneratorSpec extends WordSpec with Matchers {
       val invocationForm = InvocationForm(trivialServiceWithImport, importedServices = Some(Seq(referenceApiService)))
       val result = PostmanCollectionGenerator.invoke(invocationForm)
 
-      assertResultCollectionJson(result) { collectionJson =>
-        val postmanFolders = (collectionJson \ "item").as[JsArray].value
-        val ageGroupsFolder = postmanFolders.find(js => (js \ "name").as[String] == "ages").get
-        val ageGroupsEndpoints = (ageGroupsFolder \ "item").as[JsArray].value
-        val getFirstAgeGroupEndpoint = ageGroupsEndpoints.find(js => (js \ "name").as[String].contains("/ages/first"))
+      assertResultCollectionJson(result) { collection =>
+        val postmanFolders = collection.item.collect {
+          case folder: postman.Folder => folder
+        }
+        val ageGroupsFolder = postmanFolders.find(_.name == "ages").get
+        val ageGroupsEndpoints = ageGroupsFolder.item
+        val getFirstAgeGroupEndpoint = ageGroupsEndpoints.find(_.name.exists(_.contains("/ages/first")))
           .getOrElse(fail("generated service does not contain GET /ages/first"))
 
-        val getFirstAgeGroupEndpointResponseExample = (getFirstAgeGroupEndpoint \ "response").as[JsArray].value.head
+        val getFirstAgeGroupEndpointResponseExample = getFirstAgeGroupEndpoint.response.get.head
 
-        (getFirstAgeGroupEndpointResponseExample \ "code").as[Int] shouldEqual 200
+        getFirstAgeGroupEndpointResponseExample.code shouldEqual Some(200)
 
-        val responseExampleJson = Json.parse((getFirstAgeGroupEndpointResponseExample \ "body").as[String])
+        val responseExampleJson = Json.parse(getFirstAgeGroupEndpointResponseExample.body.get)
         val exampleGroup = (responseExampleJson \ "group").as[String]
         importedEnum.values.map(_.name) should contain(exampleGroup)
       }
@@ -155,13 +154,13 @@ class PostmanCollectionGeneratorSpec extends WordSpec with Matchers {
 
   }
 
-  private def assertResultCollectionJson(result: Either[Seq[String], Seq[File]])(jsonAssertion: JsValue => Assertion): Assertion = {
+  private def assertResultCollectionJson(result: Either[Seq[String], Seq[File]])(collectionAssertion: postman.Collection => Assertion): Assertion = {
     result.isRight shouldEqual true
     val resultFile = result.right.get.head
     resultFile.name.endsWith("postman_collection.json") shouldEqual true
-    val postmanCollectionJson = Json.parse(resultFile.contents)
+    val postmanCollection = Json.parse(resultFile.contents).as[postman.Collection]
 
-    jsonAssertion(postmanCollectionJson)
+    collectionAssertion(postmanCollection)
   }
 
   trait TrivialServiceContext {

@@ -4,7 +4,7 @@ import examples.ExampleJson
 import generator.Heuristics.PathVariable
 import generator.PostmanCollectionGenerator.Variables
 import generator.Utils.Description
-import io.apibuilder.spec.v0.models.{Operation, Parameter, ParameterLocation, ResponseCodeInt}
+import io.apibuilder.spec.v0.models._
 import io.flow.postman.collection.v210.v0.{models => postman}
 import play.api.Logging
 import play.api.libs.json.Json
@@ -139,11 +139,7 @@ object PostmanItemBuilder extends Logging {
             if (response.`type`.equalsIgnoreCase("unit")) None
             else modelExampleProvider.sample(response.`type`).map(Json.prettyPrint)
 
-          val responseTypeSimpleName = {
-            val typ = response.`type`
-            val startIndex = typ.lastIndexOf('.') + 1
-            typ.slice(startIndex, typ.length)
-          }
+          val responseTypeSimpleName = extractSimpleName(response)
 
           val responseHeadersOpt = response.headers.map { headers =>
             headers.map { header =>
@@ -173,6 +169,12 @@ object PostmanItemBuilder extends Logging {
           None
       }
     }
+  }
+
+  private def extractSimpleName(response: Response): String = {
+    val typ = response.`type`
+    val startIndex = typ.lastIndexOf('.') + 1
+    typ.slice(startIndex, typ.length)
   }
 
 }

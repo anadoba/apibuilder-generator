@@ -198,7 +198,7 @@ class PostmanItemBuilderSpec extends WordSpec with Matchers {
 
     def serviceSpecificHeaders: Seq[postman.Header] = Seq.empty
 
-    def buildPostmanItem: postman.Item = PostmanItemBuilder.build(baseUrl, testOperation, serviceSpecificHeaders, exampleProvider, None)
+    def buildPostmanItem: postman.Item = PostmanItemBuilder.build(testOperation, serviceSpecificHeaders, exampleProvider, None)
 
     def commonAssertions(postmanItem: postman.Item): Assertion = {
       postmanItem.name shouldEqual Some(s"$method $path")

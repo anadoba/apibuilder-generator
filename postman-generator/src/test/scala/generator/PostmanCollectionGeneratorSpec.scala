@@ -77,7 +77,7 @@ class PostmanCollectionGeneratorSpec extends WordSpec with Matchers {
           |  },
           |  "variable" : [ {
           |    "type" : "string",
-          |    "value" : "https://api.flow.io",
+          |    "value" : "",
           |    "key" : "BASE_URL"
           |  } ],
           |  "event" : [ ],

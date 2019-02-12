@@ -203,7 +203,7 @@ class PostmanItemBuilderSpec extends WordSpec with Matchers {
     def commonAssertions(postmanItem: postman.Item): Assertion = {
       postmanItem.name shouldEqual Some(s"$method $path")
       postmanItem.description shouldEqual Some(Description(description))
-      postmanItem.request.url.get.raw shouldEqual /* TODO: after fix, it should be baseUrl, not a variable */ Some("{{BASE_URL}}" + path)
+      postmanItem.request.url.get.raw shouldEqual Some("{{BASE_URL}}" + path)
       postmanItem.event shouldEqual None
     }
 

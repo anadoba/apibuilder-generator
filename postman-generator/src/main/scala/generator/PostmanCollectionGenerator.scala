@@ -108,10 +108,10 @@ object PostmanCollectionGenerator extends CodeGenerator {
       item = setupFolder.item ++ requiredEntitiesSetupSteps
     )
 
-    val basicAuthOpt = service.attributes.collectFirst {
-      case basicAuthAttr if basicAuthAttr.name.equalsIgnoreCase(PostmanBasicAuthAttribute.Key) =>
-        basicAuthAttr.value.asOpt[PostmanBasicAuthAttrValue]
-    }.flatten.map { basicAuth =>
+    val basicAuthOpt = service.attributes
+      .find(_.name.equalsIgnoreCase(PostmanBasicAuthAttribute.Key))
+      .flatMap(_.value.asOpt[PostmanBasicAuthAttrValue])
+      .map { basicAuth =>
       postman.Auth(
         `type` = postman.AuthEnum.Basic,
         basic = Some(List(

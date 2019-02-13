@@ -34,7 +34,6 @@ class PostmanCollectionGeneratorSpec extends WordSpec with Matchers {
       result.isRight shouldEqual true
 
       val generatedCollectionJson = Json.parse(result.right.get.head.contents)
-      // TODO: below JSON contains 'variable' element that is hardcoded now. delete after fixing the logic
       generatedCollectionJson shouldEqual Json.parse(
         """
           |{

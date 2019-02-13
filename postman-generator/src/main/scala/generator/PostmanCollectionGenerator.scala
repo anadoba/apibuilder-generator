@@ -119,7 +119,7 @@ object PostmanCollectionGenerator extends CodeGenerator {
         val setupFolder: postman.Folder = PredefinedCollectionItems.prepareSetupFolder()
         (Option(setupFolder) :: entitiesSetupFolderOpt :: Nil).flatten ++ postmanCollectionFolders.toList ++ List(cleanupFolder)
       } else {
-        entitiesSetupFolderOpt ++: (postmanCollectionFolders)
+        entitiesSetupFolderOpt ++: postmanCollectionFolders
       })
 
     postman.Collection(

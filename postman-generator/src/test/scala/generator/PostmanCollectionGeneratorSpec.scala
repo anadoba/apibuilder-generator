@@ -2,6 +2,7 @@ package generator
 
 import generator.Utils.Description
 import io.apibuilder.generator.v0.models.{File, InvocationForm}
+import io.apibuilder.spec.v0.models.Attribute
 import io.flow.postman.collection.v210.v0.{models => postman}
 import io.flow.postman.collection.v210.v0.models.json.jsonReadsPostmanCollectionV210Collection
 import models.attributes.PostmanAttributes

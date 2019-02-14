@@ -5,7 +5,7 @@ import generator.Heuristics.PathVariable
 import io.apibuilder.generator.v0.models.{File, InvocationForm}
 import io.apibuilder.spec.v0.models._
 import lib.generator.CodeGenerator
-import models.attributes.ObjectReferenceAttribute.ObjectReferenceAttrValue
+import models.attributes.PostmanAttributes.ObjectReferenceAttrValue
 import io.flow.postman.collection.v210.v0.{models => postman}
 import io.flow.postman.collection.v210.v0.models.json._
 import models.service.{ResolvedService, ServiceImportResolver}

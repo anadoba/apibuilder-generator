@@ -1,11 +1,13 @@
 package generator
 
 import examples.ExampleJson
-import org.scalatest.{Matchers, WordSpec}
+import io.apibuilder.spec.v0.models.Service
+import org.scalatest.{Assertion, Matchers, WordSpec}
 
 class ServiceImportResolverSpec extends WordSpec with Matchers {
 
   import TestFixtures._
+  import scala.language.reflectiveCalls
 
   "ServiceImportResolver" should {
 
@@ -34,31 +36,34 @@ class ServiceImportResolverSpec extends WordSpec with Matchers {
     }
 
     "leave the enums, models, unions type intact if it comes from the main service" in new ResolvedServiceTestContext {
-      val enumsIntact = mainService.enums.forall(enum => resultService.enums.exists(_.name == enum.name))
-      enumsIntact shouldEqual true
+      def assertTypeNamesIntact[T](serviceToObjs: Service => Seq[T {def name: String}]): Assertion = {
+        val sourceObjs = serviceToObjs(mainService)
+        val resultObjs = serviceToObjs(resultService)
+        val typeNamesIntact = sourceObjs.forall(obj => resultObjs.exists(_.name == obj.name))
+        typeNamesIntact shouldEqual true
+      }
 
-      val modelsIntact = mainService.models.forall(model => resultService.models.exists(_.name == model.name))
-      modelsIntact shouldEqual true
-
-      val unionsIntact = mainService.unions.forall(union => resultService.unions.exists(_.name == union.name))
-      unionsIntact shouldEqual true
+      assertTypeNamesIntact(_.enums)
+      assertTypeNamesIntact(_.models)
+      assertTypeNamesIntact(_.unions)
     }
 
     "rename the merged enums, models, unions type to the full namespace+name" in new ResolvedServiceTestContext {
-      val enumNamesWithFullNamespace = importedService.enums.forall { enum =>
-        resultService.enums.exists(e => e.name.contains(importedService.namespace) && e.name.contains(enum.name))
+      def assertTypeNamesWithFullNamespace[T](serviceToObjs: Service => Seq[T {def name: String}]): Assertion = {
+        val sourceObjs = serviceToObjs(importedService)
+        val resultObjs = serviceToObjs(resultService)
+        val typeNamesWithFullNamespace = sourceObjs.forall { sourceEnum =>
+          resultObjs.exists(resultEnum =>
+            resultEnum.name.contains(importedService.namespace) &&
+              resultEnum.name.contains(sourceEnum.name)
+          )
+        }
+        typeNamesWithFullNamespace shouldEqual true
       }
-      enumNamesWithFullNamespace shouldEqual true
 
-      val modelNamesWithFullNamespace = importedService.models.forall { model =>
-        resultService.models.exists(m => m.name.contains(importedService.namespace) && m.name.contains(model.name))
-      }
-      modelNamesWithFullNamespace shouldEqual true
-
-      val unionNamesWithFullNamespace = importedService.unions.forall { union =>
-        resultService.unions.exists(u => u.name.contains(importedService.namespace) && u.name.contains(union.name))
-      }
-      unionNamesWithFullNamespace shouldEqual true
+      assertTypeNamesWithFullNamespace(_.enums)
+      assertTypeNamesWithFullNamespace(_.models)
+      assertTypeNamesWithFullNamespace(_.unions)
     }
 
     "rename complex field types in the imported models so they match the full namespace+type" in new ResolvedServiceTestContext {

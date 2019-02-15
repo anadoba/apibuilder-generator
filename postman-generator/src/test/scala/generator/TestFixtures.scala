@@ -6,7 +6,6 @@ object TestFixtures {
 
   import models.TestHelper.{referenceApiService, generatorApiServiceWithUnionWithoutDescriminator}
 
-
   trait TrivialServiceContext {
     val trivialService = Service(
       apidoc = Apidoc("0.1"),

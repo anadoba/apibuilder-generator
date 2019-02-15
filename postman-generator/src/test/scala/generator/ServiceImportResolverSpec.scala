@@ -83,7 +83,7 @@ class ServiceImportResolverSpec extends WordSpec with Matchers {
       }
     }
 
-    "rename complex types in the imported models so they match the full namespace+type" in new ResolvedServiceWithUnionsTestContext {
+    "rename complex types in the imported unions so they match the full namespace+type" in new ResolvedServiceWithUnionsTestContext {
       val unionNameToTypesMap = importedService.unions.map(u => (u.name, u.types)).toMap
       val typesDefinedInService = importedService.models.map(_.name) ++ importedService.enums.map(_.name)
       val unionNameToTypesMapToCheck = unionNameToTypesMap.map {

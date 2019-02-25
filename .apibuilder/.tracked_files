@@ -15,3 +15,6 @@ flow:
   postman:
     play_2_x_json:
     - generated/app/FlowPostmanCollectionV210V0Models.scala
+  postman-generator-attributes:
+    play_2_x_json:
+    - generated/app/FlowPostmanGeneratorAttributesV0Models.scala

@@ -9,12 +9,12 @@ import io.flow.postman.generator.attributes.v0.models.AttributeName
 import io.flow.postman.generator.attributes.v0.models.ObjectReference
 import io.flow.postman.generator.attributes.v0.models.BasicAuth
 import io.flow.postman.generator.attributes.v0.models.json.jsonReadsPostmanGeneratorAttributesBasicAuth
-import io.flow.postman.collection.v210.v0.{models => postman}
-import io.flow.postman.collection.v210.v0.models.json._
+import io.flow.postman.v0.{models => postman}
+import io.flow.postman.v0.models.json._
 import models.service.ResolvedService
 import play.api.libs.json.Json
 import Utils._
-import io.flow.postman.collection.v210.v0.models.Folder
+import io.flow.postman.v0.models.Folder
 import models.attributes.PostmanAttributes
 
 object PostmanCollectionGenerator extends CodeGenerator {

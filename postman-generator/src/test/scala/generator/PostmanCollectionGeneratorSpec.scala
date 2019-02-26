@@ -3,8 +3,8 @@ package generator
 import generator.Utils.Description
 import io.apibuilder.generator.v0.models.{File, InvocationForm}
 import io.apibuilder.spec.v0.models.Attribute
-import io.flow.postman.collection.v210.v0.{models => postman}
-import io.flow.postman.collection.v210.v0.models.json.jsonReadsPostmanCollectionV210Collection
+import io.flow.postman.v0.{models => postman}
+import io.flow.postman.v0.models.json.jsonReadsPostmanCollection
 import io.flow.postman.generator.attributes.v0.models.AttributeName
 import io.flow.postman.generator.attributes.v0.models.BasicAuth
 import io.flow.postman.generator.attributes.v0.models.json.jsonWritesPostmanGeneratorAttributesBasicAuth

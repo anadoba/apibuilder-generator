@@ -22,7 +22,8 @@ object PostmanCollectionGenerator extends CodeGenerator {
 
   object Constants {
     val BaseUrl = "BASE_URL"
-    val EntitiesSetup =  "Entities Setup"
+    val EntitiesSetup = "Entities Setup"
+    val EntitiesCleanup = "Entities Cleanup"
   }
 
   override def invoke(form: InvocationForm): Either[Seq[String], Seq[File]] = {
@@ -85,6 +86,7 @@ object PostmanCollectionGenerator extends CodeGenerator {
       }
 
     val entitiesSetupFolderOpt = prepareDependentEntitiesSetup(resolvedService, serviceSpecificHeaders, examplesProvider)
+    val entitiesCleanupFolderOpt = prepareDependentEntitiesCleanup(resolvedService, serviceSpecificHeaders, examplesProvider)
 
     val postmanCollectionFolders = for {
       resource <- service.resources
@@ -104,7 +106,7 @@ object PostmanCollectionGenerator extends CodeGenerator {
         val setupFolder: Folder = PredefinedCollectionItems.prepareSetupFolder()
         (Option(setupFolder) :: entitiesSetupFolderOpt :: Nil).flatten ++ postmanCollectionFolders.toList ++ List(cleanupFolder)
       } else {
-        entitiesSetupFolderOpt ++: postmanCollectionFolders
+        (entitiesSetupFolderOpt ++: postmanCollectionFolders ++: entitiesCleanupFolderOpt).toSeq
       }
 
     postman.Collection(
@@ -167,7 +169,7 @@ object PostmanCollectionGenerator extends CodeGenerator {
     val requiredEntitiesSetupSteps = objReferenceAttrToOperationTuples.map {
       case (objRefAttr, operation) =>
 
-        val postmanItem = PostmanItemBuilder.build(operation, serviceSpecificHeaders, examplesProvider, None)
+        val postmanItem = PostmanItemBuilder.build(operation.referencedOperation, serviceSpecificHeaders, examplesProvider, None)
         val postmanItemWithTests = addItemTests(postmanItem)
 
         addDependencyItemVarSetting(objRefAttr, postmanItemWithTests, None)
@@ -226,6 +228,66 @@ object PostmanCollectionGenerator extends CodeGenerator {
         )
         item.copy(event = Some(Seq(eventToAdd)))
     }
+  }
+
+  /**
+    * Prepares dependency entities cleanup phase with DELETE operations.
+    * Fills all path parameters with postman variable references.
+    * If parameter is not specified, it tries to build it from raw path
+    * for example /sth/:id/sth => new 'id' param is created
+    *
+    * @param resolvedService Service with all imports at hand.
+    * @param serviceSpecificHeaders Service specific headers.
+    * @param examplesProvider Examples generator.
+    * @return Dependent entities cleanup folder for postman.
+    */
+  def prepareDependentEntitiesCleanup(
+    resolvedService          : ResolvedService,
+    serviceSpecificHeaders   : Seq[postman.Header],
+    examplesProvider         : ExampleJson
+  ): Option[Folder] = {
+    val objReferenceAttrToOperationTuples = DependantOperationResolver.resolve(resolvedService)
+
+    val requiredEntitiesCleanupSteps = objReferenceAttrToOperationTuples.collect {
+      case (objRefAttr, operation) if operation.deleteOperationOpt.isDefined =>
+        val deleteOperation = operation.deleteOperationOpt.get
+
+        val (pathParameters, otherParams) = deleteOperation.parameters.partition(_.location === ParameterLocation.Path)
+        val filledPathParameters = pathParameters match {
+          case params if pathParameters.nonEmpty =>
+            val updatedLast = params.lastOption.get.copy(example = Some(objRefAttr.postmanVariableName.reference))
+            params.init :+ updatedLast
+          case _ =>
+            val rawPathParamOpt =
+              deleteOperation.path
+                .split('/')
+                .reverse
+                .find(_.startsWith(":"))
+                .map(_.stripPrefix(":"))
+
+            rawPathParamOpt.map { rawPathParam =>
+              Parameter(
+                name = rawPathParam,
+                `type` = "string",
+                location = ParameterLocation.Path,
+                example = Some(objRefAttr.postmanVariableName.reference),
+                required = true
+              )
+            }.toSeq
+        }
+        val filledDeleteOp = deleteOperation.copy(parameters = filledPathParameters ++ otherParams)
+
+        val postmanItem = PostmanItemBuilder.build(filledDeleteOp, serviceSpecificHeaders, examplesProvider, None)
+        addItemTests(postmanItem)
+    }
+
+    if (requiredEntitiesCleanupSteps.nonEmpty) {
+      Some(
+        postman.Folder(
+          Constants.EntitiesCleanup,
+          item = requiredEntitiesCleanupSteps
+        ))
+    } else None
   }
 
   private def writePostmanCollectionToFile(service: Service, postmanCollection: postman.Collection): File = {

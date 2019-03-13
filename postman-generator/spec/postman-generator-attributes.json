@@ -61,7 +61,7 @@
         {
           "name": "delete_operation_path",
           "type": "string",
-          "description": "Optionally, the referenced entity's DELETE operation path can be put here. If specified, the generator will add a cleanup step for the referenced object.",
+          "description": "Optionally, the referenced entity's DELETE operation path can be put here. This needs to be a full operation path (taken from the service.json). If specified, the generator will add a cleanup step for the referenced object.",
           "required": false
         }
       ]

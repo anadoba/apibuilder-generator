@@ -31,8 +31,9 @@ package io.flow.postman.generator.attributes.v0.models {
    * @param operationMethod Referenced operation method.
    * @param identifierField A field name. When the referenced operation is called, identifier_field is used
    *        to extract the corresponding field from the response JSON.
-   * @param deleteOperationPath Optionally, the referenced entity's DELETE operation path can be put here. If
-   *        specified, the generator will add a cleanup step for the referenced object.
+   * @param deleteOperationPath Optionally, the referenced entity's DELETE operation path can be put here. This
+   *        needs to be a full operation path (taken from the service.json). If specified,
+   *        the generator will add a cleanup step for the referenced object.
    */
   final case class ObjectReference(
     relatedServiceNamespace: String,

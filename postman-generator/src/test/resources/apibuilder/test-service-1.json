@@ -225,7 +225,7 @@
     {
       "name": "postman-basic-auth",
       "value": {
-        "username": "{{FLOW_TOKEN}}",
+        "username": "{{MY_TOKEN}}",
         "password": ""
       }
     }

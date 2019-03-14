@@ -556,7 +556,7 @@
     "type": "basic",
     "basic": [
       {
-        "value": "{{FLOW_TOKEN}}",
+        "value": "{{MY_TOKEN}}",
         "key": "username"
       }, {
         "value": "",

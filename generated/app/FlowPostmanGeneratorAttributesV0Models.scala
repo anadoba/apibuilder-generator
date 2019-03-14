@@ -64,7 +64,6 @@ package io.flow.postman.generator.attributes.v0.models {
 
     case object PostmanBasicAuth extends AttributeName { override def toString = "postman-basic-auth" }
     case object ObjectReference extends AttributeName { override def toString = "object-reference" }
-    case object OrganizationSetup extends AttributeName { override def toString = "organization-setup" }
     case object ValueSubstitute extends AttributeName { override def toString = "value-substitute" }
 
     /**
@@ -83,7 +82,7 @@ package io.flow.postman.generator.attributes.v0.models {
      * lower case to avoid collisions with the camel cased values
      * above.
      */
-    val all: scala.List[AttributeName] = scala.List(PostmanBasicAuth, ObjectReference, OrganizationSetup, ValueSubstitute)
+    val all: scala.List[AttributeName] = scala.List(PostmanBasicAuth, ObjectReference, ValueSubstitute)
 
     private[this]
     val byName: Map[String, AttributeName] = all.map(x => x.toString.toLowerCase -> x).toMap

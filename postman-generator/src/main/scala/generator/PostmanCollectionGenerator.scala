@@ -101,13 +101,9 @@ object PostmanCollectionGenerator extends CodeGenerator {
     }
 
     val folders: Seq[Folder] =
-      if (shouldAddSetupFolder(service)) {
-        val cleanupFolder: Folder = PredefinedCollectionItems.prepareCleanupFolder()
-        val setupFolder: Folder = PredefinedCollectionItems.prepareSetupFolder()
-        (Option(setupFolder) :: entitiesSetupFolderOpt :: Nil).flatten ++ postmanCollectionFolders.toList ++ List(cleanupFolder)
-      } else {
-        (entitiesSetupFolderOpt ++: postmanCollectionFolders ++: entitiesCleanupFolderOpt).toSeq
-      }
+      (entitiesSetupFolderOpt ++:
+        postmanCollectionFolders ++:
+        entitiesCleanupFolderOpt).toSeq
 
     postman.Collection(
       info = collectionInfo,
@@ -122,13 +118,6 @@ object PostmanCollectionGenerator extends CodeGenerator {
       auth = basicAuthOpt,
       event = Seq.empty
     )
-  }
-
-  private def shouldAddSetupFolder(service: Service) = {
-    service.attributes
-      .find(_.name.equalsIgnoreCase(AttributeName.OrganizationSetup.toString))
-      .nonEmpty
-
   }
 
   def prepareHeuristicPathVar(resource: Resource): Option[PathVariable] = {
@@ -197,8 +186,6 @@ object PostmanCollectionGenerator extends CodeGenerator {
   }
 
   def addDependencyItemVarSetting(objRefAttr: ExtendedObjectReference, item: postman.Item, varNameOpt: Option[String]): postman.Item = {
-
-    import objRefAttr._
 
     val varName = objRefAttr.postmanVariableName.name
 

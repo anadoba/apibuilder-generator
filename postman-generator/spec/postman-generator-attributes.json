@@ -12,7 +12,6 @@
       "values": [
         { "name": "postman-basic-auth" },
         { "name": "object-reference" },
-        { "name": "organization-setup" },
         { "name": "value-substitute"}
       ]
     }

@@ -133,6 +133,7 @@ object TestFixtures {
       resourceType = "member",
       operationMethod = Method("POST"),
       identifierField = "guid",
+      operationPath = "/members",
       deleteOperationPath = Some(extraDeleteOpPath)
     )
 

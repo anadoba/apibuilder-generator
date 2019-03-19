@@ -158,14 +158,11 @@ object PostmanCollectionGenerator extends CodeGenerator {
     val setupItemToCleanupItemOpts = objReferenceAttrToOperationTuples.map {
       case (objRefAttr, operation) =>
 
-        val setupItem = PostmanItemBuilder.build(operation.referencedOperation, serviceSpecificHeaders, examplesProvider, None)
-        val setupItemWithTests = addItemTests(setupItem)
-        val setupWithTestsAndVar = addDependencyItemVarSetting(objRefAttr, setupItemWithTests, None)
-
+        val setupItem = prepareSetupOperation(objRefAttr, operation.referencedOperation, serviceSpecificHeaders, examplesProvider)
         val deleteItemOpt = operation.deleteOperationOpt
             .map(prepareDeleteOpWithFilledParam(objRefAttr, _, serviceSpecificHeaders, examplesProvider))
 
-        setupWithTestsAndVar -> deleteItemOpt
+        setupItem -> deleteItemOpt
     }
 
     val setupSteps = setupItemToCleanupItemOpts.map(_._1)
@@ -194,9 +191,16 @@ object PostmanCollectionGenerator extends CodeGenerator {
 
     val varName = objRefAttr.postmanVariableName.name
 
+    val successfulStatusCodes = Set(200, 201)
+    val rootJsonObjIsArray = item.response.flatMap(_.collectFirst {
+      case resp if resp.code.exists(successfulStatusCodes.contains) =>
+        resp.body.exists(t => t.trim.startsWith("[") && t.trim.endsWith("]"))
+    }).getOrElse(false)
+    val jsonBase = if (rootJsonObjIsArray) "jsonData[0]" else "jsonData"
+
     val scriptExecFragment = Seq(
       """var jsonData = JSON.parse(responseBody);""",
-      s"""var id = jsonData["${objRefAttr.identifierField}"];""",
+      s"""var id = $jsonBase.${objRefAttr.identifierField};""",
       s"""if (id != null) pm.environment.set("$varName", id);"""
     )
     item.event
@@ -220,6 +224,50 @@ object PostmanCollectionGenerator extends CodeGenerator {
         )
         item.copy(event = Some(Seq(eventToAdd)))
     }
+  }
+
+  private def prepareSetupOperation(
+    objRefAttr: ExtendedObjectReference,
+    referencedOperation: Operation,
+    serviceSpecificHeaders: Seq[postman.Header],
+    examplesProvider: ExampleJson): Item = {
+
+    val filledReferencedOperation = objRefAttr.queryParams match {
+      case Some(queryParams) if queryParams.nonEmpty =>
+        fillQueryParams(referencedOperation, queryParams)
+      case _ => referencedOperation
+    }
+
+    val setupItem = PostmanItemBuilder.build(filledReferencedOperation, serviceSpecificHeaders, examplesProvider, None)
+    val setupItemWithTests = addItemTests(setupItem)
+    val setupWithTestsAndVar = addDependencyItemVarSetting(objRefAttr, setupItemWithTests, None)
+
+    setupWithTestsAndVar
+  }
+
+  private def fillQueryParams(operation: Operation, rawQueryParamMap: Map[String, String]): Operation = {
+    val (queryParameters, otherParams) = operation.parameters.partition(_.location === ParameterLocation.Query)
+    val filledQueryParams = rawQueryParamMap.map {
+      case (key, value) =>
+        val targetQueryParamOpt = queryParameters.find(_.name equalsIgnoreCase key)
+        targetQueryParamOpt match {
+          case Some(queryParam) =>
+            queryParam.copy(
+              example = Some(value),
+              required = true
+            )
+          case None =>
+            Parameter(
+              name = key,
+              `type` = "string",
+              location = ParameterLocation.Path,
+              example = Some(value),
+              required = true
+            )
+        }
+    }.toSeq
+
+    operation.copy(parameters = filledQueryParams ++ otherParams)
   }
 
   private def prepareDeleteOpWithFilledParam(

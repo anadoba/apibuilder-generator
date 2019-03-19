@@ -39,6 +39,7 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
         relatedServiceNamespace = referenceApiService.namespace,
         resourceType = "group",
         operationMethod = Method("GET"),
+        operationPath = "/users/:age_group",
         identifierField = "members[0].age_group"
       )
       val dependency2Target = getTargetOperation(referenceApiService, objRef2AttrValue)
@@ -61,6 +62,7 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
         relatedServiceNamespace = generatorApiServiceWithUnionWithoutDescriminator.namespace,
         resourceType = "user",
         operationMethod = Method("POST"),
+        operationPath = "/users",
         identifierField = "guid"
       )
       val dependencyToThirdServiceTarget = {

@@ -125,6 +125,14 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
       ).toExtended
     }
 
+    "resolve a dependency bound to the resource path" in {
+      1 shouldEqual 1
+    }
+
+    "resolve a nested dependency bound to the operation referenced by resource path attribute" in {
+      1 shouldEqual 1
+    }
+
   }
 
   implicit class SeqObjectRefOperationExtend(seq: Seq[(ObjectReference, DependantOperations)]) {

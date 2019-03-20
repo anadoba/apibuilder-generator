@@ -125,12 +125,41 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
       ).toExtended
     }
 
-    "resolve a dependency bound to the resource path" in {
-      1 shouldEqual 1
+    "resolve a dependency bound to the resource path" in new TestCtxWithAttrFromResourcePath {
+      val resolvedService = ServiceImportResolver.resolveService(testMainService, Seq(referenceApiService))
+      val result = DependantOperationResolver.resolve(resolvedService)
+
+      result should === (List(objectRef1AttrValue.toExtended -> dependency1Target))
     }
 
-    "resolve a nested dependency bound to the operation referenced by resource path attribute" in {
-      1 shouldEqual 1
+    "resolve a nested dependency bound to the body of the operation referenced by the resource path attribute" in new TestCtxWithAttrFromResourcePath {
+      val objRef2AttrValue = ObjectReference(
+        relatedServiceNamespace = updatedReferenceApiService.namespace,
+        resourceType = "group",
+        operationMethod = Method("GET"),
+        operationPath = "/groups/:organization",
+        identifierField = "members[0].age_group"
+      )
+      val dependency2Target = getTargetOperation(updatedReferenceApiService, objRef2AttrValue)
+      val testReferenceApiService = addAttributeToModelField(updatedReferenceApiService, "member", "role", objRef2AttrValue)
+
+      val resolvedService = ServiceImportResolver.resolveService(testMainService, Seq(testReferenceApiService))
+      val result = DependantOperationResolver.resolve(resolvedService)
+
+      val dep1Target = {
+        val dependantOperations = getTargetOperation(testReferenceApiService, objectRef1AttrValue)
+        val referencedOperation = dependantOperations.referencedOperation
+        val updatedBody = referencedOperation.body.get.copy(`type` = objectRef1AttrValue.relatedServiceNamespace + ".models." + referencedOperation.body.get.`type`)
+        val updatedReferencedOperation = referencedOperation.copy(body = Some(updatedBody))
+        dependantOperations.copy(referencedOperation = updatedReferencedOperation)
+      }
+
+      val expected: Seq[(ExtendedObjectReference, DependantOperations)] = Seq(
+        objRef2AttrValue -> dependency2Target,
+        objectRef1AttrValue -> dep1Target
+      ).toExtended
+
+      result should contain allElementsOf expected
     }
 
   }
@@ -198,6 +227,16 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
   trait TestCtxWithTwoImportedServices extends TestDependencies with TestFixtures.TrivialServiceWithTwoImportsCtx {
     val testMainServiceWithTwoImports = trivialServiceWithTwoImports.copy(
       models = Seq(modelWithDependency)
+    )
+  }
+
+  trait TestCtxWithAttrFromResourcePath extends TestDependencies {
+    val resourceWithImportedEnumAndObjRef = resourceWithImportedEnum.copy(
+      attributes = Seq(objectRef1Attribute)
+    )
+    val indexOfLastResource = trivialServiceWithImport.resources.length - 1
+    val testMainService = trivialServiceWithImport.copy(
+      resources = trivialServiceWithImport.resources.updated(indexOfLastResource, resourceWithImportedEnumAndObjRef)
     )
   }
 

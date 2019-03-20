@@ -137,6 +137,11 @@ object TestFixtures {
       deleteOperationPath = Some(extraDeleteOpPath)
     )
 
+    val objectRef1Attribute = Attribute(
+      name = AttributeName.ObjectReference.toString,
+      value = Json.toJson(objectRef1AttrValue).as[JsObject]
+    )
+
     val modelWithDependency = Model(
       name = "complex-string",
       plural = "complex-strings",
@@ -146,12 +151,7 @@ object TestFixtures {
           `type` = "string",
           example = Some("something"),
           required = true,
-          attributes = Seq(
-            Attribute(
-              AttributeName.ObjectReference.toString,
-              Json.toJson(objectRef1AttrValue).as[JsObject]
-            )
-          )
+          attributes = Seq(objectRef1Attribute)
         )
       )
     )

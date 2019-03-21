@@ -3,7 +3,9 @@ package generator
 import io.apibuilder.spec.v0.models._
 import io.flow.postman.generator.attributes.v0.models.{AttributeName, ObjectReference}
 import io.flow.postman.generator.attributes.v0.models.json.jsonWritesPostmanGeneratorAttributesObjectReference
+import models.operation.DependantOperations
 import play.api.libs.json.{JsObject, Json}
+import org.scalactic.TripleEquals._
 
 object TestFixtures {
 
@@ -48,6 +50,21 @@ object TestFixtures {
       ),
       baseUrl = Some("https://some.service.com")
     )
+
+    def getTargetOperation(targetService: Service, objRefAttrValue: ObjectReference): DependantOperations = {
+      val targetResource =
+        targetService
+          .resources.find(_.`type` === objRefAttrValue.resourceType).get
+
+      val referencedOp = targetResource
+        .operations.find(_.method === objRefAttrValue.operationMethod).get
+      val deleteOpOption = objRefAttrValue.deleteOperationPath.flatMap { deleteOpPath =>
+        targetResource
+          .operations.find(_.path === deleteOpPath)
+      }
+
+      DependantOperations(referencedOp, deleteOpOption)
+    }
 
   }
 

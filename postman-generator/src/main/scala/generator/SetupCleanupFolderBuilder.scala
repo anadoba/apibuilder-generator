@@ -5,8 +5,8 @@ import generator.PostmanCollectionGenerator.Constants
 import io.apibuilder.spec.v0.models.{Operation, Parameter, ParameterLocation}
 import io.flow.postman.v0.models.{Folder, Item}
 import models.attributes.PostmanAttributes.ExtendedObjectReference
-import models.service.ResolvedService
 import io.flow.postman.v0.{models => postman}
+import models.operation.DependantOperations
 import org.scalactic.TripleEquals._
 
 object SetupCleanupFolderBuilder {
@@ -14,17 +14,16 @@ object SetupCleanupFolderBuilder {
   /**
     * Prepares dependant entities setup and cleanup phases.
     *
-    * @param resolvedService Service with all imports at hand.
-    * @param serviceSpecificHeaders Service specific headers.
-    * @param examplesProvider Examples generator.
+    * @param objReferenceAttrToOperationTuples sequence of tuples, {{ExtendedObjectReference}} to {{DependantOperations}}.
+    * @param serviceSpecificHeaders            Service-specific headers.
+    * @param examplesProvider                  Examples generator.
     * @return Tuple of options of dependant entities setup and cleanup folders for Postman.
     */
   def prepareDependantEntitiesSetupAndCleanup(
-    resolvedService          : ResolvedService,
-    serviceSpecificHeaders   : Seq[postman.Header],
-    examplesProvider         : ExampleJson
+    objReferenceAttrToOperationTuples: Seq[(ExtendedObjectReference, DependantOperations)],
+    serviceSpecificHeaders: Seq[postman.Header],
+    examplesProvider: ExampleJson
   ): (Option[Folder], Option[Folder]) = {
-    val objReferenceAttrToOperationTuples = DependantOperationResolver.resolve(resolvedService)
 
     val setupItemToCleanupItemOpts = objReferenceAttrToOperationTuples.map {
       case (objRefAttr, operation) =>
@@ -118,7 +117,7 @@ object SetupCleanupFolderBuilder {
             Parameter(
               name = key,
               `type` = "string",
-              location = ParameterLocation.Path,
+              location = ParameterLocation.Query,
               example = Some(value),
               required = true
             )
@@ -170,7 +169,8 @@ object SetupCleanupFolderBuilder {
         postman.Folder(
           name = folderName,
           item = items
-        ))
+        )
+      )
     } else None
   }
 

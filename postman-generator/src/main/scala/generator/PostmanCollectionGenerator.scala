@@ -83,8 +83,10 @@ object PostmanCollectionGenerator extends CodeGenerator {
         )
       }
 
+    val objReferenceAttrToOperationTuples = DependantOperationResolver.resolve(resolvedService)
+
     val (entitiesSetupFolderOpt, entitiesCleanupFolderOpt) =
-      SetupCleanupFolderBuilder.prepareDependantEntitiesSetupAndCleanup(resolvedService, serviceSpecificHeaders, examplesProvider)
+      SetupCleanupFolderBuilder.prepareDependantEntitiesSetupAndCleanup(objReferenceAttrToOperationTuples, serviceSpecificHeaders, examplesProvider)
 
     val postmanCollectionFolders = for {
       resource <- service.resources

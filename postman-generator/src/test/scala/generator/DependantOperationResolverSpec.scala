@@ -172,21 +172,6 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
     }
   }
 
-  private def getTargetOperation(targetService: Service, objRefAttrValue: ObjectReference): DependantOperations = {
-    val targetResource =
-      targetService
-        .resources.find(_.`type` === objRefAttrValue.resourceType).get
-
-    val referencedOp = targetResource
-      .operations.find(_.method === objRefAttrValue.operationMethod).get
-    val deleteOpOption = objRefAttrValue.deleteOperationPath.flatMap { deleteOpPath =>
-      targetResource
-        .operations.find(_.path === deleteOpPath)
-    }
-
-    DependantOperations(referencedOp, deleteOpOption)
-  }
-
   private def addAttributeToModelField(service: Service, modelName: String, fieldName: String, attributeValue: ObjectReference): Service = {
     val oldModel = service
       .models.find(_.name == modelName).get

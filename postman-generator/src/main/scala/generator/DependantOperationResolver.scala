@@ -3,6 +3,7 @@ package generator
 import io.apibuilder.spec.v0.models._
 import io.flow.postman.generator.attributes.v0.models.json._
 import io.flow.postman.generator.attributes.v0.models.{AttributeName, ObjectReference}
+import lib.Datatype.Primitive
 import models.AttributeValueReader
 import models.service.ResolvedService
 import org.scalactic.TripleEquals._
@@ -166,7 +167,7 @@ object DependantOperationResolver extends Logging {
     firstParameterNameOpt.map { paramName =>
       Parameter(
         name = paramName,
-        `type` = "string",
+        `type` = Primitive.String.name,
         location = ParameterLocation.Path,
         required = true
       )

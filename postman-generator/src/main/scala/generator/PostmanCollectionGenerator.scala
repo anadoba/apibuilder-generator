@@ -13,6 +13,7 @@ import models.service.ResolvedService
 import play.api.libs.json.Json
 import Utils._
 import io.flow.postman.v0.models.{Folder, Item}
+import lib.Datatype.Primitive
 
 object PostmanCollectionGenerator extends CodeGenerator {
 
@@ -112,7 +113,7 @@ object PostmanCollectionGenerator extends CodeGenerator {
         Utils.Variable(
           key = Constants.BaseUrl,
           value = baseUrl.getOrElse(""),
-          `type` = "string"
+          `type` = Primitive.String.name
         )
       ),
       auth = basicAuthOpt,

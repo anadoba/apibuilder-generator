@@ -1,11 +1,13 @@
 package generator
 
+import akka.http.scaladsl.model.StatusCodes
 import examples.ExampleJson
 import generator.PostmanCollectionGenerator.Constants
 import io.apibuilder.spec.v0.models.{Operation, Parameter, ParameterLocation}
 import io.flow.postman.v0.models.{Folder, Item}
 import models.attributes.PostmanAttributes.ExtendedObjectReference
 import io.flow.postman.v0.{models => postman}
+import lib.Datatype.Primitive
 import models.operation.DependantOperations
 import org.scalactic.TripleEquals._
 
@@ -28,9 +30,12 @@ object SetupCleanupFolderBuilder {
     val setupItemToCleanupItemOpts = objReferenceAttrToOperationTuples.map {
       case (objRefAttr, operation) =>
 
-        val setupItem = prepareSetupOperation(objRefAttr, operation.referencedOperation, serviceSpecificHeaders, examplesProvider)
-        val deleteItemOpt = operation.deleteOperationOpt
-          .map(prepareDeleteOpWithFilledParam(objRefAttr, _, serviceSpecificHeaders, examplesProvider))
+        val setupItem =
+          prepareSetupOperation(objRefAttr, operation.referencedOperation, serviceSpecificHeaders, examplesProvider)
+        val deleteItemOpt =
+          operation
+            .deleteOperationOpt
+            .map(prepareDeleteOpWithFilledParam(objRefAttr, _, serviceSpecificHeaders, examplesProvider))
 
         setupItem -> deleteItemOpt
     }
@@ -38,8 +43,8 @@ object SetupCleanupFolderBuilder {
     val setupSteps = setupItemToCleanupItemOpts.map(_._1)
     val cleanupSteps = setupItemToCleanupItemOpts.flatMap(_._2)
 
-    val setupFolderOpt = wrapInFolderIfNotEmpty(setupSteps, Constants.EntitiesSetup)
-    val cleanupFolderOpt = wrapInFolderIfNotEmpty(cleanupSteps, Constants.EntitiesCleanup)
+    val setupFolderOpt = wrapInFolder(setupSteps, Constants.EntitiesSetup)
+    val cleanupFolderOpt = wrapInFolder(cleanupSteps, Constants.EntitiesCleanup)
 
     setupFolderOpt -> cleanupFolderOpt
   }
@@ -48,7 +53,7 @@ object SetupCleanupFolderBuilder {
 
     val varName = objRefAttr.postmanVariableName.name
 
-    val successfulStatusCodes = Set(200, 201)
+    val successfulStatusCodes = Set(StatusCodes.OK.intValue, StatusCodes.Created.intValue)
     val rootJsonObjIsArray = item.response.flatMap(_.collectFirst {
       case resp if resp.code.exists(successfulStatusCodes.contains) =>
         resp.body.exists(t => t.trim.startsWith("[") && t.trim.endsWith("]"))
@@ -60,8 +65,10 @@ object SetupCleanupFolderBuilder {
       s"""var id = $jsonBase.${objRefAttr.identifierField};""",
       s"""if (id != null) pm.environment.set("$varName", id);"""
     )
-    item.event
-      .getOrElse(Seq.empty)
+
+    val events = item.event.getOrElse(Seq.empty)
+
+    events
       .find(_.listen === postman.EventType.Test) match {
       case Some(testEvent) =>
         val updatedScript = testEvent.script.map(_.copy(
@@ -69,8 +76,7 @@ object SetupCleanupFolderBuilder {
         ))
         val updatedTestEvent = testEvent.copy(script = updatedScript)
         val updatedEvents =
-          item.event.getOrElse(Seq.empty)
-            .filterNot(_.listen === postman.EventType.Test) :+ updatedTestEvent
+          events.filterNot(_.listen === postman.EventType.Test) :+ updatedTestEvent
         item.copy(event = Some(updatedEvents))
       case None =>
         val eventToAdd = postman.Event(
@@ -103,7 +109,11 @@ object SetupCleanupFolderBuilder {
   }
 
   private def fillQueryParams(operation: Operation, rawQueryParamMap: Map[String, String]): Operation = {
-    val (queryParameters, otherParams) = operation.parameters.partition(_.location === ParameterLocation.Query)
+    val (queryParameters, otherParams) =
+      operation
+        .parameters
+        .partition(_.location === ParameterLocation.Query)
+
     val filledQueryParams = rawQueryParamMap.map {
       case (key, value) =>
         val targetQueryParamOpt = queryParameters.find(_.name equalsIgnoreCase key)
@@ -116,7 +126,7 @@ object SetupCleanupFolderBuilder {
           case None =>
             Parameter(
               name = key,
-              `type` = "string",
+              `type` = Primitive.String.name,
               location = ParameterLocation.Query,
               example = Some(value),
               required = true
@@ -139,18 +149,12 @@ object SetupCleanupFolderBuilder {
         val updatedLast = params.lastOption.get.copy(example = Some(objRefAttr.postmanVariableName.reference))
         params.init :+ updatedLast
       case _ =>
-        val rawPathParamOpt =
-          deleteOperation
-            .path
-            .split('/')
-            .reverse
-            .find(_.startsWith(":"))
-            .map(_.stripPrefix(":"))
+        val rawPathParamOpt = findLastPathParam(deleteOperation.path)
 
         rawPathParamOpt.map { rawPathParam =>
           Parameter(
             name = rawPathParam,
-            `type` = "string",
+            `type` = Primitive.String.name,
             location = ParameterLocation.Path,
             example = Some(objRefAttr.postmanVariableName.reference),
             required = true
@@ -163,7 +167,16 @@ object SetupCleanupFolderBuilder {
     PredefinedCollectionItems.addItemTests(postmanItem)
   }
 
-  private def wrapInFolderIfNotEmpty(items: Seq[Item], folderName: String): Option[Folder] = {
+  private def findLastPathParam(path: String): Option[String] = {
+    path
+      .split('/')
+      .reverse
+      .find(_.startsWith(":"))
+      .map(_.stripPrefix(":"))
+  }
+
+
+  private def wrapInFolder(items: Seq[Item], folderName: String): Option[Folder] = {
     if (items.nonEmpty) {
       Some(
         postman.Folder(

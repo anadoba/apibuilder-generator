@@ -35,13 +35,6 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
     }
 
     "resolve second level dependencies (dependency has its own dependency) in the right order" in new TestCtxWithImportedService {
-      val objRef2AttrValue = ObjectReference(
-        relatedServiceNamespace = referenceApiService.namespace,
-        resourceType = "group",
-        operationMethod = Method("GET"),
-        operationPath = "/groups/:organization",
-        identifierField = "members[0].age_group"
-      )
       val dependency2Target = getTargetOperation(referenceApiService, objRef2AttrValue)
       val testReferenceApiService = addAttributeToModelField(referenceApiService, "member", "role", objRef2AttrValue)
 
@@ -61,7 +54,7 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
       val objRefToThirdServiceAttrValue = ObjectReference(
         relatedServiceNamespace = generatorApiServiceWithUnionWithoutDescriminator.namespace,
         resourceType = "user",
-        operationMethod = Method("POST"),
+        operationMethod = Method.Post,
         operationPath = "/users",
         identifierField = "guid"
       )
@@ -133,13 +126,6 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
     }
 
     "resolve a nested dependency bound to the body of the operation referenced by the resource path attribute" in new TestCtxWithAttrFromResourcePath {
-      val objRef2AttrValue = ObjectReference(
-        relatedServiceNamespace = updatedReferenceApiService.namespace,
-        resourceType = "group",
-        operationMethod = Method("GET"),
-        operationPath = "/groups/:organization",
-        identifierField = "members[0].age_group"
-      )
       val dependency2Target = getTargetOperation(updatedReferenceApiService, objRef2AttrValue)
       val testReferenceApiService = addAttributeToModelField(updatedReferenceApiService, "member", "role", objRef2AttrValue)
 
@@ -201,6 +187,14 @@ class DependantOperationResolverSpec extends WordSpec with Matchers {
 
   trait TestDependencies extends TestFixtures.TrivialServiceWithImportAndDependencyCtx {
     val dependency1Target = getTargetOperation(referenceApiService, objectRef1AttrValue)
+
+    val objRef2AttrValue = ObjectReference(
+      relatedServiceNamespace = referenceApiService.namespace,
+      resourceType = "group",
+      operationMethod = Method.Get,
+      operationPath = "/groups/:organization",
+      identifierField = "members[0].age_group"
+    )
   }
 
   trait TestCtxWithImportedService extends TestDependencies with TestFixtures.TrivialServiceWithImportCtx {

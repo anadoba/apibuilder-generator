@@ -3,6 +3,7 @@ package generator
 import io.apibuilder.spec.v0.models._
 import io.flow.postman.generator.attributes.v0.models.{AttributeName, ObjectReference}
 import io.flow.postman.generator.attributes.v0.models.json.jsonWritesPostmanGeneratorAttributesObjectReference
+import lib.Datatype.Primitive
 import models.operation.DependantOperations
 import play.api.libs.json.{JsObject, Json}
 import org.scalactic.TripleEquals._
@@ -27,7 +28,7 @@ object TestFixtures {
           fields = Seq(
             Field(
               name = "value",
-              `type` = "string",
+              `type` = Primitive.String.name,
               example = Some("something"),
               required = true
             )
@@ -133,7 +134,7 @@ object TestFixtures {
       parameters = Seq(
         Parameter(
           name = "id",
-          `type` = "string",
+          `type` = Primitive.String.name,
           location = ParameterLocation.Path,
           required = true
         )
@@ -165,7 +166,7 @@ object TestFixtures {
       fields = Seq(
         Field(
           name = "value",
-          `type` = "string",
+          `type` = Primitive.String.name,
           example = Some("something"),
           required = true,
           attributes = Seq(objectRef1Attribute)

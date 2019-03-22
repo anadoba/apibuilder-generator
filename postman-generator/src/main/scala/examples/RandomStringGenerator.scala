@@ -11,7 +11,7 @@ object ScalaRandomStringGenerator extends RandomStringGenerator {
 
   override def generate(seed: String): String = {
     val string = randomStringStream.take(6).mkString
-    s"lorem ipsum $string"
+    s"lorem_ipsum_$string"
   }
 
   private def randomStringStream: Stream[Char] =
@@ -21,6 +21,6 @@ object ScalaRandomStringGenerator extends RandomStringGenerator {
 object MurmurRandomStringGenerator extends RandomStringGenerator {
   override def generate(seed: String): String = {
     val hash = MurmurHash3.stringHash(seed).toString.takeRight(6)
-    s"lorem ipsum $hash"
+    s"lorem_ipsum_$hash"
   }
 }

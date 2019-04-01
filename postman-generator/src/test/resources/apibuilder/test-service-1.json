@@ -6,14 +6,14 @@
     "key": "ecorp"
   },
   "application": {
-    "key": "apidoc-reference-api"
-  },
-  "namespace": "io.ecorp.api.v0",
-  "version": "0.3.47",
-  "info": {},
-  "name": "catalog",
-  "base_url": "https://api.ecorp.io",
-  "headers": [ ],
+  "key": "apidoc-reference-api"
+},
+"namespace": "io.ecorp.api.v0",
+"version": "0.3.47",
+"info": {},
+"name": "catalog",
+"base_url": "https://api.ecorp.io",
+"headers": [ ],
   "imports": [ ],
   "enums": [ ],
   "unions": [ ],
@@ -103,7 +103,7 @@
     {
       "type": "catalog",
       "plural": "catalogs",
-      "path": "/:organization/:subcatalog_id",
+      "path": "/:organization",
       "attributes": [
         {
           "name": "object-reference",
@@ -122,6 +122,31 @@
           "method": "POST",
           "description": "Create catalog.",
           "path": "/:organization/catalog",
+          "attributes": [ ],
+          "parameters": [
+            {
+              "name": "organization",
+              "type": "uuid",
+              "location": "Path",
+              "required": true
+            }
+          ],
+          "responses": [
+            {
+              "headers": [ ],
+              "code": {
+                "integer": {
+                  "value": 204
+                }
+              },
+              "type": "unit"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "description": "Create catalog.",
+          "path": "/:organization/subcatalog",
           "attributes": [ ],
           "parameters": [
             {
@@ -173,7 +198,63 @@
           }
         }
       ]
-    }, {
+    },
+    {
+      "type": "subcatalog",
+      "plural": "subcatalogs",
+      "path": "/:catalog/:subcatalog",
+      "parameters": [ ],
+      "attributes": [
+        {
+          "name": "object-reference",
+          "value": {
+            "related_service_namespace": "io.ecorp.api.v0",
+            "resource_type": "catalog",
+            "operation_method": "POST",
+            "operation_path": "/:organization/catalog",
+            "identifier_field": "id"
+          }
+        },
+        {
+          "name": "object-reference",
+          "value": {
+            "related_service_namespace": "io.ecorp.api.v0",
+            "resource_type": "catalog",
+            "operation_method": "POST",
+            "operation_path": "/:organization/subcatalog",
+            "identifier_field": "id"
+          }
+        }
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "description": "Get subcatalog",
+          "path": "/:catalog/:subcatalog",
+          "attributes": [],
+          "parameters": [
+            {
+              "name": "organization",
+              "type": "uuid",
+              "location": "Path",
+              "required": true
+            }
+          ],
+          "responses": [
+            {
+              "headers": [ ],
+              "code": {
+                "integer": {
+                  "value": 200
+                }
+              },
+              "type": "unit"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "type": "organization",
       "plural": "organizations",
       "path": "",

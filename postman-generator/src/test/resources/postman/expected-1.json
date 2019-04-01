@@ -157,7 +157,7 @@
           "request": {
             "method": "POST",
             "description": {
-              "content": "Create catalog."
+              "content": "Create subcatalog."
             },
             "header": [ ],
             "url": {
@@ -182,7 +182,7 @@
               "originalRequest": {
                 "method": "POST",
                 "description": {
-                  "content": "Create catalog."
+                  "content": "Create subcatalog."
                 },
                 "header": [ ],
                 "url": {
@@ -209,7 +209,7 @@
           ],
           "name": "POST /:organization/subcatalog",
           "description": {
-            "content": "Create catalog."
+            "content": "Create subcatalog."
           },
           "event": [
             {
@@ -320,7 +320,7 @@
                     "content": "Type: uuid  | Required: true"
                   },
                   "disabled": false,
-                  "value": "{{catalogs-organization}}",
+                  "value": "{{organization}}",
                   "key": "organization"
                 }
               ],
@@ -345,7 +345,7 @@
                         "content": "Type: uuid  | Required: true"
                       },
                       "disabled": false,
-                      "value": "{{catalogs-organization}}",
+                      "value": "{{organization}}",
                       "key": "organization"
                     }
                   ],
@@ -377,7 +377,7 @@
           "request": {
             "method": "POST",
             "description": {
-              "content": "Create catalog."
+              "content": "Create subcatalog."
             },
             "header": [ ],
             "url": {
@@ -390,7 +390,7 @@
                     "content": "Type: uuid  | Required: true"
                   },
                   "disabled": false,
-                  "value": "{{catalogs-organization}}",
+                  "value": "{{organization}}",
                   "key": "organization"
                 }
               ],
@@ -402,7 +402,7 @@
               "originalRequest": {
                 "method": "POST",
                 "description": {
-                  "content": "Create catalog."
+                  "content": "Create subcatalog."
                 },
                 "header": [ ],
                 "url": {
@@ -415,7 +415,7 @@
                         "content": "Type: uuid  | Required: true"
                       },
                       "disabled": false,
-                      "value": "{{catalogs-organization}}",
+                      "value": "{{organization}}",
                       "key": "organization"
                     }
                   ],
@@ -429,7 +429,7 @@
           ],
           "name": "POST /:organization/subcatalog",
           "description": {
-            "content": "Create catalog."
+            "content": "Create subcatalog."
           },
           "event": [
             {
@@ -472,7 +472,7 @@
                     "content": "Type: uuid  | Required: true"
                   },
                   "disabled": false,
-                  "value": "{{catalogs-organization}}",
+                  "value": "{{organization}}",
                   "key": "organization"
                 }
               ],
@@ -509,7 +509,7 @@
                         "content": "Type: uuid  | Required: true"
                       },
                       "disabled": false,
-                      "value": "{{catalogs-organization}}",
+                      "value": "{{organization}}",
                       "key": "organization"
                     }
                   ],
@@ -557,11 +557,18 @@
               "variable": [
                 {
                   "description": {
-                    "content": "Type: uuid  | Required: true"
+                    "content": "Type: string  | Required: true"
                   },
                   "disabled": false,
-                  "value": "{{organization}}",
-                  "key": "organization"
+                  "value": "{{catalog}}",
+                  "key": "catalog"
+                }, {
+                  "description": {
+                    "content": "Type: string  | Required: true"
+                  },
+                  "disabled": false,
+                  "value": "{{subcatalog}}",
+                  "key": "subcatalog"
                 }
               ],
               "raw": "{{BASE_URL}}/:catalog/:subcatalog"
@@ -582,11 +589,18 @@
                   "variable": [
                     {
                       "description": {
-                        "content": "Type: uuid  | Required: true"
+                        "content": "Type: string  | Required: true"
                       },
                       "disabled": false,
-                      "value": "{{organization}}",
-                      "key": "organization"
+                      "value": "{{catalog}}",
+                      "key": "catalog"
+                    }, {
+                      "description": {
+                        "content": "Type: string  | Required: true"
+                      },
+                      "disabled": false,
+                      "value": "{{subcatalog}}",
+                      "key": "subcatalog"
                     }
                   ],
                   "raw": "{{BASE_URL}}/:catalog/:subcatalog"

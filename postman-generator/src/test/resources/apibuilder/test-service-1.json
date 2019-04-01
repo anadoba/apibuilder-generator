@@ -6,14 +6,14 @@
     "key": "ecorp"
   },
   "application": {
-  "key": "apidoc-reference-api"
-},
-"namespace": "io.ecorp.api.v0",
-"version": "0.3.47",
-"info": {},
-"name": "catalog",
-"base_url": "https://api.ecorp.io",
-"headers": [ ],
+    "key": "apidoc-reference-api"
+  },
+  "namespace": "io.ecorp.api.v0",
+  "version": "0.3.47",
+  "info": {},
+  "name": "catalog",
+  "base_url": "https://api.ecorp.io",
+  "headers": [ ],
   "imports": [ ],
   "enums": [ ],
   "unions": [ ],
@@ -145,7 +145,7 @@
         },
         {
           "method": "POST",
-          "description": "Create catalog.",
+          "description": "Create subcatalog.",
           "path": "/:organization/subcatalog",
           "attributes": [ ],
           "parameters": [
@@ -203,7 +203,6 @@
       "type": "subcatalog",
       "plural": "subcatalogs",
       "path": "/:catalog/:subcatalog",
-      "parameters": [ ],
       "attributes": [
         {
           "name": "object-reference",
@@ -231,11 +230,17 @@
           "method": "GET",
           "description": "Get subcatalog",
           "path": "/:catalog/:subcatalog",
-          "attributes": [],
+          "attributes": [ ],
           "parameters": [
             {
-              "name": "organization",
-              "type": "uuid",
+              "name": "catalog",
+              "type": "string",
+              "location": "Path",
+              "required": true
+            },
+            {
+              "name": "subcatalog",
+              "type": "string",
               "location": "Path",
               "required": true
             }

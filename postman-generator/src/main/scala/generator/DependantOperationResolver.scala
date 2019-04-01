@@ -46,9 +46,9 @@ object DependantOperationResolver extends Logging {
           && parameters.size > 0)
         pureAttr <- tryAttributeReadsWithLogging[ObjectReference](foundedPathAttrIdx._1.value).toSeq
         extendedObjectReference = pureAttr.toExtended
-        postmanVariableNameOpt = postmanVariableNameFrom(parameters(foundedPathAttrIdx._2))
+        postmanVariableName = postmanVariableNameFrom(parameters(foundedPathAttrIdx._2))
       } yield {
-        extendedObjectReference.copy(postmanVariableName = postmanVariableNameOpt)
+        extendedObjectReference.copy(postmanVariableName = postmanVariableName)
       }
     }
 

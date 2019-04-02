@@ -6,11 +6,11 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.{CompilationUnit, NodeList}
 import com.github.javaparser.ast.body.{AnnotationDeclaration, FieldDeclaration, MethodDeclaration}
 import com.github.javaparser.ast.expr.{AnnotationExpr, MemberValuePair, NormalAnnotationExpr}
-import models.TestHelper.assertJodaTimeNotPresent
+
 import scala.collection.JavaConverters._
 import scala.compat.java8.OptionConverters._
 
-class AwsLambdaJavaPOJOClassesSpec
+class TestAwsLambdaJavaPOJOClasses
   extends FunSpec
     with Matchers {
 
@@ -175,13 +175,11 @@ class AwsLambdaJavaPOJOClassesSpec
     result.isRight should be(true)
     val files = result.right.get
     files.size should be(2)
-    assertJodaTimeNotPresent(files)
     files(0).name should be("CarType.java")
     files(1).name should be("Model.java")
 
-    val javaParser = new JavaParser()
-    val carTypeCompiled = javaParser.parse(files(0).contents).getResult.get
-    val modelCompiled = javaParser.parse(files(1).contents).getResult.get
+    val carTypeCompiled = JavaParser.parse(files(0).contents)
+    val modelCompiled = JavaParser.parse(files(1).contents)
 
     val javaAnnotations = modelCompiled.findAll(classOf[NormalAnnotationExpr])
     val annotations: Set[String] = (for(i <- 0 until javaAnnotations.size()) yield javaAnnotations.get(i).getNameAsString).toSet

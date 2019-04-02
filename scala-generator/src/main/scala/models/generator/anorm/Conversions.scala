@@ -1,34 +1,22 @@
 package scala.generator.anorm
 
 import lib.Text._
-import scala.generator.{ScalaPrimitive, ScalaService}
-import scala.models.TimeConfig
+import scala.generator.{Namespaces, ScalaPrimitive, ScalaService}
 
 object Conversions {
 
-  private val JavaPrimitiveTypes = Seq(
+  private val Types = Seq(
     ScalaPrimitive.Boolean,
     ScalaPrimitive.Double,
     ScalaPrimitive.Integer,
     ScalaPrimitive.Long,
-  )
-
-  private val JodaTimeTypes = Seq(
     ScalaPrimitive.DateIso8601Joda,
     ScalaPrimitive.DateTimeIso8601Joda,
-  )
-
-  private val JavaTimeTypes = Seq(
-    ScalaPrimitive.DateIso8601Java,
-    ScalaPrimitive.DateTimeIso8601Java,
-  )
-
-  private val ObjectTypes = Seq(
     ScalaPrimitive.Decimal,
     ScalaPrimitive.ObjectAsPlay,
     ScalaPrimitive.JsonValueAsPlay,
     ScalaPrimitive.String,
-    ScalaPrimitive.Uuid,
+    ScalaPrimitive.Uuid
   )
 
   private val Header = """
@@ -81,12 +69,6 @@ package %s {
     ssd: ScalaService,
     attributes: ParserGeneratorPlayVersionSpecificAttributes
   ): String = {
-
-    val coreTypes = ssd.config.timeLib match {
-      case TimeConfig.JavaTime => JavaPrimitiveTypes ++ JavaTimeTypes ++ ObjectTypes
-      case TimeConfig.JodaTime => JavaPrimitiveTypes ++ JodaTimeTypes ++ ObjectTypes
-    }
-
     Seq(
       Header.format(ssd.namespaces.anormConversions, attributes.imports.map(i => s"\n  import $i").mkString),
       Seq(
@@ -96,22 +78,20 @@ package %s {
       ).flatten.mkString("\n").indent(2),
       Seq(
         "object Standard {",
-        standard(coreTypes).indent(2),
+        coreTypes().indent(2),
         "}"
       ).mkString("\n").indent(2),
       "}"
     ).mkString("\n\n")
   }
 
-  private def standard(
-    types: Seq[ScalaPrimitive],
-  ): String = {
+  def coreTypes(): String = {
     (
       Seq(
         Seq(
           s"implicit val columnToJsObject: Column[play.api.libs.json.JsObject] = Util.parser { _.as[play.api.libs.json.JsObject] }"
         )
-      ) ++ types.map { t =>
+      ) ++ Types.map { t =>
         Seq(
           s"implicit val columnToSeq${t.shortName}: Column[Seq[${t.fullName}]] = Util.parser { _.as[Seq[${t.fullName}]] }",
           s"implicit val columnToMap${t.shortName}: Column[Map[String, ${t.fullName}]] = Util.parser { _.as[Map[String, ${t.fullName}]] }"

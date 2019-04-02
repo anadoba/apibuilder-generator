@@ -3,7 +3,7 @@ package scala.models
 import io.apibuilder.generator.v0.models.{Attribute, InvocationForm}
 import io.apibuilder.spec.v0.models.Method
 import models.TestHelper
-import models.TestHelper.{assertJodaTimeNotPresent, assertValidScalaSourceCode}
+import models.TestHelper.assertValidScalaSourceCode
 
 import scala.generator.{ScalaClientMethodConfigs, ScalaClientMethodGenerator, ScalaService}
 import org.scalatest.{FunSpec, Matchers}
@@ -225,14 +225,13 @@ class Play2ClientGeneratorSpec extends FunSpec with Matchers {
     it("generates date-time with java.time") {
       val form = new InvocationForm(
         models.TestHelper.parseFile("/examples/date-time-types.json"),
-        Seq(Attribute("scala_generator.time_library", "java")),
+        Seq(Attribute("time", "java")),
         None
       )
       val Right(files) = Play27ClientGenerator.invoke(form)
       files.size shouldBe 1
       files(0).name shouldBe "ApibuilderTimeTypesV0Client.scala"
       assertValidScalaSourceCode(files(0).contents)
-      assertJodaTimeNotPresent(files)
       models.TestHelper.assertEqualsFile(s"/generators/play-27-java-date-time.txt", files(0).contents)
     }
   }

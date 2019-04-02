@@ -1,19 +1,27 @@
 package scala.models.play.files
 
-import io.apibuilder.generator.v0.models.{File, InvocationForm}
-
-import scala.models.Play2Models
-import scala.models.{Config, TimeConfig}
+import io.apibuilder.generator.v0.models.InvocationForm
+import scala.generator.Namespaces
 
 object ModelsJson {
 
-  def implicits(ssd: scala.generator.ScalaService) = ssd.config.timeLib match {
-      case TimeConfig.JavaTime => Play2Models.javaTimeImplicits
-      case TimeConfig.JodaTime => Play2Models.jodaImplicits
-  }
+  def uuidFormat(): String = s"""
+    import play.api.libs.json.Reads.uuidReads
+    import play.api.libs.json.Writes.UuidWrites
+  """
+
+  def jodaDateTimeFormat(): String = s"""
+    import play.api.libs.json.JodaReads.DefaultJodaDateTimeReads
+    import play.api.libs.json.JodaWrites.JodaDateTimeWrites
+  """
+
+  def jodaLocalDateFormat(): String = s"""
+    import play.api.libs.json.JodaReads.DefaultJodaLocalDateReads
+    import play.api.libs.json.JodaWrites.DefaultJodaLocalDateWrites
+  """
 
   def contents(form: InvocationForm): String = {
-    val scalaService = scala.generator.ScalaService(form.service, Config(form.attributes, Config.PlayGen2DefaultConfig))
+    val scalaService = scala.generator.ScalaService(form.service)
     val imports = scala.models.JsonImports(form.service)
     val gen = scala.models.Play2Json(scalaService)
 
@@ -25,7 +33,9 @@ object ModelsJson {
         import play.api.libs.json.{__, JsString, Writes}
         import play.api.libs.functional.syntax._
 
-        ${implicits(scalaService)}
+        ${uuidFormat()}
+        ${jodaDateTimeFormat()}
+        ${jodaLocalDateFormat()}
 
         ${imports.mkString("\n")}
 

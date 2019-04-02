@@ -76,14 +76,6 @@ object TestHelper extends Matchers {
     }
   }
 
-  def assertJodaTimeNotPresent(files: Seq[File]): Unit = {
-    files.foreach(assertJodaTimeNotPresent(_))
-  }
-
-  def assertJodaTimeNotPresent(file: File): Unit = {
-    file.contents shouldNot include("org.joda.time")
-  }
-
   def assertValidScalaSourceFiles(files: Seq[File]): Unit = {
     files.length shouldBe > (0)
     files.foreach(assertValidScalaSourceFile)

@@ -30,8 +30,8 @@ lazy val lib = project
 
 lazy val generator = project
   .in(file("generator"))
-  .dependsOn(scalaGenerator, rubyGenerator, javaGenerator, goGenerator, androidGenerator, kotlinGenerator, javaAwsLambdaPojos)
-  .aggregate(scalaGenerator, rubyGenerator, javaGenerator, goGenerator, androidGenerator, kotlinGenerator, javaAwsLambdaPojos)
+  .dependsOn(scalaGenerator, rubyGenerator, javaGenerator, goGenerator, androidGenerator, kotlinGenerator, javaAwsLambdaPojos, postmanGenerator)
+  .aggregate(scalaGenerator, rubyGenerator, javaGenerator, goGenerator, androidGenerator, kotlinGenerator, javaAwsLambdaPojos, postmanGenerator)
   .enablePlugins(PlayScala)
   .settings(commonSettings: _*)
   .settings(
@@ -63,7 +63,7 @@ lazy val scalaGenerator = project
   .dependsOn(lib, lib % "test->test")
   .settings(commonSettings: _*)
   .settings(
-    Seq(ScoverageKeys.coverageMinimum := 80.0),
+    Seq(ScoverageKeys.coverageMinimum := 84.0),
     scalacOptions += "-Ypartial-unification",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.5.0",
@@ -103,15 +103,26 @@ lazy val kotlinGenerator = project
     libraryDependencies ++= Seq(
       "com.fasterxml.jackson.module" % "jackson-module-kotlin" % "2.9.8",
       "org.threeten" % "threetenbp" % "1.3.8",
-      "com.squareup" % "kotlinpoet" % "1.0.1",
+      "com.squareup" % "kotlinpoet" % "1.1.0",
       "com.squareup.retrofit2" % "retrofit" % "2.5.0",
       "com.jakewharton.retrofit" % "retrofit2-rxjava2-adapter" % "1.0.0",
       "org.jetbrains.kotlin" % "kotlin-compiler" % "1.3.10" % "test",
-      "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-      "org.mockito" % "mockito-core" % "2.23.4" % "test"
+      "org.scalatest" %% "scalatest" % "3.0.7" % "test",
+      "org.mockito" % "mockito-core" % "2.25.1" % "test"
     )
   )
   .settings(Seq(ScoverageKeys.coverageMinimum := 95.15, ScoverageKeys.coverageFailOnMinimum := true))
+
+lazy val postmanGenerator = project
+  .in(file("postman-generator"))
+  .dependsOn(lib, lib % "test->test")
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++=Seq(
+      "com.lihaoyi" %% "ammonite-ops" % "1.6.3",
+      "org.scalactic" %% "scalactic" % "3.0.5"
+    )
+  )
 
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("apibuilder-generator-" + _),
@@ -119,11 +130,10 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   ScoverageKeys.coverageFailOnMinimum := true,
   libraryDependencies ++= Seq(
     "org.atteo" % "evo-inflector" % "1.2.2",
-    "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-    "org.mockito" % "mockito-core" % "2.23.4" % "test",
-    "com.github.javaparser" % "javaparser-core" % "3.8.3" % "test",
-    "org.scala-lang" % "scala-compiler" % scalaVer % "test",
-    "org.scalameta" %% "scalameta" % "4.0.0" % "test",
+    "org.scalatest" %% "scalatest" % "3.0.7" % "test",
+    "org.mockito" % "mockito-core" % "2.25.1" % "test",
+    "com.github.javaparser" % "javaparser-core" % "3.13.4" % "test",
+    "org.scalameta" %% "scalameta" % "4.1.5" % "test",
     "com.squareup" % "javapoet" % "1.11.1",
     "com.squareup.retrofit2" % "retrofit" % "2.5.0",
     "io.reactivex.rxjava2" % "rxjava" % "2.2.4"

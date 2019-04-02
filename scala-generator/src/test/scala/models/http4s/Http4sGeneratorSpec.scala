@@ -1,7 +1,7 @@
 package models.http4s
 
 import io.apibuilder.generator.v0.models.{Attribute, InvocationForm}
-import models.TestHelper.assertValidScalaSourceCode
+import models.TestHelper.{assertJodaTimeNotPresent, assertValidScalaSourceCode}
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.models.http4s.{Http4s015Generator, Http4s017Generator, Http4s018Generator, Http4s020Generator}
@@ -82,6 +82,7 @@ class Http4sGeneratorSpec extends FunSpec with Matchers {
       )
       val Right(files) = Http4s020Generator.invoke(form)
       files.size shouldBe 7
+      assertJodaTimeNotPresent(files)
       files.zipWithIndex.foreach { case (file, idx) =>
         fileNames(idx).foreach { fileName =>
           file.name shouldBe fileName
@@ -94,7 +95,7 @@ class Http4sGeneratorSpec extends FunSpec with Matchers {
     it("http4s with joda 0.20") {
       val form = new InvocationForm(
         models.TestHelper.parseFile("/examples/date-time-types.json"),
-        Seq(Attribute("time", "joda")),
+        Seq(Attribute("scala_generator.time_library", "joda")),
         None
       )
       val Right(files) = Http4s020Generator.invoke(form)
